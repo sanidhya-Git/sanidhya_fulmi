@@ -25,7 +25,7 @@ export async function createClaim(userId: string, cardId: string, pattern: strin
     let settings = await AdminSettingsModel.findOne().session(session);
     if (!settings) {
       settings = await AdminSettingsModel.create([{ maxClaimsPerPattern: {}, remainingClaimsPerPattern: {}, cardsPerUserDefault: 1 }], { session });
-      // @ts-ignore
+      
       settings = settings[0];
     }
 
