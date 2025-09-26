@@ -1,7 +1,8 @@
 import ClaimModel from '../models/Claim';
 import BingoCardModel from '../models/BingoCard';
 import GameSessionModel from '../models/GameSession';
-import AdminSettingsModel from '../models/AdminSettings';
+import { AdminSettingsModel} from '../models/AdminSettings';
+import IAdminSettings from '../models/AdminSettings';
 import UserModel from '../models/User';
 import { checkPattern } from '../utils/patternChecker';
 import { generate6DigitToken } from '../utils/token';
@@ -24,36 +25,42 @@ export async function createClaim(userId: string, cardId: string, pattern: strin
 
     let settings = await AdminSettingsModel.findOne().session(session);
     if (!settings) {
-      settings = await AdminSettingsModel.create([{ maxClaimsPerPattern: {}, remainingClaimsPerPattern: {}, cardsPerUserDefault: 1 }], { session });
-      
-      settings = settings[0];
+      settings = new AdminSettingsModel({
+        maxClaimsPerPattern: new Map<string, number>(),
+        remainingClaimsPerPattern: new Map<string, number>(),
+        cardsPerUserDefault: 1,
+      });
+      await settings.save({ session });
     }
 
-    const remMap = settings.remainingClaimsPerPattern || new Map<string, number>();
-    const maxMap = settings.maxClaimsPerPattern || new Map<string, number>();
-    const maxForPattern = maxMap.get(pattern) as unknown as number | undefined;
-    let remainingForPattern = remMap.get(pattern) as unknown as number | undefined;
+    const remMap = settings.remainingClaimsPerPattern!;
+    const maxMap = settings.maxClaimsPerPattern!;
 
-    if (typeof maxForPattern === 'number' && typeof remainingForPattern === 'undefined') {
+    const maxForPattern = maxMap.get(pattern);
+    let remainingForPattern = remMap.get(pattern);
+
+    if (typeof maxForPattern === 'number' && remainingForPattern === undefined) {
       remainingForPattern = maxForPattern;
       settings.remainingClaimsPerPattern.set(pattern, remainingForPattern);
       await settings.save({ session });
     }
 
-    if (typeof remainingForPattern === 'number' && remainingForPattern <= 0) {
+    if (typeof remainingForPattern === 'number' && remainingForPattern <= 0)
       throw new Error('No remaining claims available for this pattern');
-    }
 
     const token = matched ? generate6DigitToken() : undefined;
 
-    const claimDocs = await ClaimModel.create([{
-      cardId: card._id,
-      userId: card.userId,
-      sessionId: game._id,
-      pattern,
-      valid: Boolean(matched),
-      token
-    }], { session });
+    const claimDocs = await ClaimModel.create(
+      [{
+        cardId: card._id,
+        userId: card.userId,
+        sessionId: game._id,
+        pattern,
+        valid: Boolean(matched),
+        token,
+      }],
+      { session }
+    );
 
     if (matched && typeof remainingForPattern === 'number') {
       settings.remainingClaimsPerPattern.set(pattern, remainingForPattern - 1);
@@ -61,8 +68,6 @@ export async function createClaim(userId: string, cardId: string, pattern: strin
     }
 
     await session.commitTransaction();
-    session.endSession();
-
     const createdClaim = claimDocs[0];
 
     if (matched) {
@@ -73,7 +78,7 @@ export async function createClaim(userId: string, cardId: string, pattern: strin
           claimId: String(createdClaim._id),
           token: String(token),
           pattern,
-          sessionId: String(game._id)
+          sessionId: String(game._id),
         });
       }
     }
@@ -81,7 +86,8 @@ export async function createClaim(userId: string, cardId: string, pattern: strin
     return { claim: createdClaim, matched, coords };
   } catch (err) {
     await session.abortTransaction();
-    session.endSession();
     throw err;
+  } finally {
+    session.endSession();
   }
 }

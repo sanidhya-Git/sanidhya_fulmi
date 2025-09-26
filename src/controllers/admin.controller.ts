@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import UserModel from '../models/User';
 import ClaimModel from '../models/Claim';
-import AdminSettingsModel from '../models/AdminSettings';
+import {AdminSettingsModel }from '../models/AdminSettings';
 
 export async function getUsers(_req: Request, res: Response) {
   const users = await UserModel.find().lean();

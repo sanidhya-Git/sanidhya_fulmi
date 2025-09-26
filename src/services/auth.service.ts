@@ -1,7 +1,8 @@
 import User, { IUser } from '../models/User';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { Secret } from 'jsonwebtoken';
 import { Types } from 'mongoose';
+import ms from 'ms';
 
 const SALT_ROUNDS = Number(process.env.SALT_ROUNDS || 10);
 
@@ -31,11 +32,31 @@ export async function authenticateUser(email: string, password: string): Promise
   return user;
 }
 
-export function signAccessToken(userId: Types.ObjectId | string, isAdmin = false) {
-  const payload = { userId: String(userId), isAdmin };
-  return jwt.sign(payload, process.env.JWT_SECRET as string, { expiresIn: process.env.JWT_EXPIRES_IN || '15m' });
+function getExpiresInSeconds(envVar: string | undefined, fallback: string): number {
+  const value = envVar || fallback;
+  const milliseconds = ms(value);
+  
+  if (milliseconds === undefined) {
+    throw new Error(`Invalid time format: ${value}. Use formats like '15m', '7d', '1h'`);
+  }
+  
+  return Math.floor(milliseconds / 1000);
 }
 
-export function signRefreshToken(userId: Types.ObjectId | string) {
-  return jwt.sign({ userId: String(userId) }, process.env.REFRESH_TOKEN_SECRET as string, { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d' });
+export function signAccessToken(userId: Types.ObjectId | string, isAdmin = false): string {
+  const payload = { userId: String(userId), isAdmin };
+  const secret: Secret = process.env.JWT_SECRET as string;
+
+  return jwt.sign(payload, secret, {
+    expiresIn: getExpiresInSeconds(process.env.JWT_EXPIRES_IN, '15m'),
+  });
+}
+
+export function signRefreshToken(userId: Types.ObjectId | string): string {
+  const payload = { userId: String(userId) };
+  const secret: Secret = process.env.REFRESH_TOKEN_SECRET as string;
+
+  return jwt.sign(payload, secret, {
+    expiresIn: getExpiresInSeconds(process.env.REFRESH_TOKEN_EXPIRES_IN, '7d'),
+  });
 }
