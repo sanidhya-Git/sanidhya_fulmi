@@ -2,7 +2,6 @@ import User, { IUser } from '../models/User';
 import bcrypt from 'bcryptjs';
 import jwt, { Secret } from 'jsonwebtoken';
 import { Types } from 'mongoose';
-import ms from 'ms';
 
 const SALT_ROUNDS = Number(process.env.SALT_ROUNDS || 10);
 
@@ -32,31 +31,48 @@ export async function authenticateUser(email: string, password: string): Promise
   return user;
 }
 
-function getExpiresInSeconds(envVar: string | undefined, fallback: string): number {
-  const value = envVar || fallback;
-  const milliseconds = ms(value);
+// Convert time strings to seconds for JWT
+function parseTimeToSeconds(timeStr: string): number {
+  const timeRegex = /^(\d+)([smhd])$/;
+  const match = timeStr.match(timeRegex);
   
-  if (milliseconds === undefined) {
-    throw new Error(`Invalid time format: ${value}. Use formats like '15m', '7d', '1h'`);
+  if (!match) {
+    throw new Error(`Invalid time format: ${timeStr}. Use formats like '15m', '7d', '1h'`);
   }
   
-  return Math.floor(milliseconds / 1000);
+  const [, num, unit] = match;
+  const number = parseInt(num, 10);
+  
+  const multipliers: { [key: string]: number } = {
+    's': 1,
+    'm': 60,
+    'h': 3600,
+    'd': 86400
+  };
+  
+  return number * multipliers[unit];
 }
 
 export function signAccessToken(userId: Types.ObjectId | string, isAdmin = false): string {
   const payload = { userId: String(userId), isAdmin };
   const secret: Secret = process.env.JWT_SECRET as string;
+  
+  // Use seconds for expiresIn (15 minutes = 900 seconds)
+  const expiresIn = process.env.JWT_EXPIRES_IN 
+    ? parseTimeToSeconds(process.env.JWT_EXPIRES_IN)
+    : 900; // 15 minutes
 
-  return jwt.sign(payload, secret, {
-    expiresIn: getExpiresInSeconds(process.env.JWT_EXPIRES_IN, '15m'),
-  });
+  return jwt.sign(payload, secret, { expiresIn });
 }
 
 export function signRefreshToken(userId: Types.ObjectId | string): string {
   const payload = { userId: String(userId) };
   const secret: Secret = process.env.REFRESH_TOKEN_SECRET as string;
+  
+  // Use seconds for expiresIn (7 days = 604800 seconds)
+  const expiresIn = process.env.REFRESH_TOKEN_EXPIRES_IN
+    ? parseTimeToSeconds(process.env.REFRESH_TOKEN_EXPIRES_IN)
+    : 604800; // 7 days
 
-  return jwt.sign(payload, secret, {
-    expiresIn: getExpiresInSeconds(process.env.REFRESH_TOKEN_EXPIRES_IN, '7d'),
-  });
+  return jwt.sign(payload, secret, { expiresIn });
 }
