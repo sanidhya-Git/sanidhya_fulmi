@@ -14,7 +14,7 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({ origin: true }));
-app.use(express.json()); // REQUIRED to parse JSON bodies
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('combined', { stream: { write: (s) => logger.http(s.trim()) } }));
 app.use(rateLimiter);

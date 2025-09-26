@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
 import * as authService from '../services/auth.service';
+// import { request } from 'http';
 
 export async function register(req: Request, res: Response) {
   try {
+    console.log(req);
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, error: 'Name, email and password are required' });
