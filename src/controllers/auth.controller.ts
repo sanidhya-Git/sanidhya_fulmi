@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import * as authService from '../services/auth.service';
-// import { request } from 'http';
+
 
 export async function register(req: Request, res: Response) {
   try {
