@@ -18,7 +18,6 @@
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.8.7",
     "morgan": "^1.10.0",
-    "multer": "^2.0.2",
     "nodemailer": "^6.9.4",
     "socket.io": "^4.8.1",
     "uuid": "^9.0.0",

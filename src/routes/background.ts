@@ -1,5 +1,4 @@
 import { Router } from "express";
-import multer from "multer";
 import { requireAdmin } from "../middleware/auth";
 import {
   uploadBackground,
@@ -8,10 +7,12 @@ import {
 } from "../controllers/background.controller";
 
 const router = Router();
-const upload = multer({ dest: "uploads/" });
 
-router.post("/", requireAdmin, upload.single("image"), uploadBackground);
+router.post("/", requireAdmin, uploadBackground);
+
 router.get("/", listBackgrounds);
+
+
 router.get("/active", getCurrentBackground);
 
 export default router;

@@ -1,8 +1,9 @@
 import BackgroundConfig, { IBackgroundConfig } from "../models/BackgroundConfig";
 import cloudinary from "../config/cloudinary";
 
-export async function uploadBackgroundImage(filePath: string): Promise<string> {
-  const res = await cloudinary.uploader.upload(filePath, {
+export async function uploadBackgroundImageFromURL(imageBase64: string): Promise<string> {
+  // Direct upload from base64 or remote URL to Cloudinary
+  const res = await cloudinary.uploader.upload(imageBase64, {
     folder: "bingo_backgrounds",
   });
   return res.secure_url;
