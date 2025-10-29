@@ -11,6 +11,8 @@ const callSchema = z.object({ number: z.number().min(1).max(75) });
 
 router.post('/', requireAuth, requireAdmin, validateBody(createSchema), createSession);
 router.post('/:id/start', requireAuth, requireAdmin, startSession);
+router.get('/:id', requireAuth, requireAdmin, startSession);
 router.post('/:id/call-number', requireAuth, requireAdmin, validateBody(callSchema), callNumber);
+
 
 export default router;
