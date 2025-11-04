@@ -51,7 +51,7 @@ export async function authenticateUser(email: string, password: string): Promise
   const user = await User.findOne({ email });
   if (!user) throw new Error('Invalid credentials');
 
-  const ok = await bcrypt.compare(password, user.passwordHash);
+  const ok = await bcrypt.compare(password, user.password);
   if (!ok) throw new Error('Invalid credentials');
 
   return user;
