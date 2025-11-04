@@ -1,18 +1,25 @@
-import { Router } from 'express';
-import { requireAuth, requireAdmin } from '../middleware/auth';
-import { createSession, startSession, callNumber } from '../controllers/sessions.controller';
-import { z } from 'zod';
-import { validateBody } from '../middleware/validate';
+import express from "express";
+import {
+  createSession,
+  startSession,
+  callNumber,
+  getSessionDetails,
+  declareWinner,
+  getSessionParticipants,
+  setSessionPatterns, 
+} from "../controllers/sessions.controller";
+import { requireAdmin, requireAuth } from "../middleware/auth";
 
-const router = Router();
+const router = express.Router();
 
-const createSchema = z.object({ name: z.string(), cardGenerationAmount: z.number().optional() });
-const callSchema = z.object({ number: z.number().min(1).max(75) });
-
-router.post('/', requireAuth, requireAdmin, validateBody(createSchema), createSession);
-router.post('/:id/start', requireAuth, requireAdmin, startSession);
-router.get('/:id', requireAuth, requireAdmin, startSession);
-router.post('/:id/call-number', requireAuth, requireAdmin, validateBody(callSchema), callNumber);
+router.post("/", createSession);
+router.post("/:id/start", startSession);
+router.post("/:id/call-number", callNumber);
+router.get("/:id", getSessionDetails);
+router.post("/:id/winner", declareWinner);
+router.get("/:id/participants", getSessionParticipants); 
+router.post("/:id/patterns", requireAuth, requireAdmin, setSessionPatterns);
+router.post("/:id/declare", requireAuth, declareWinner);
 
 
 export default router;

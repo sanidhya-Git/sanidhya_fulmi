@@ -1,18 +1,15 @@
-import { Router } from 'express';
-import authRouter from './auth';
-import sessionsRouter from './sessions';
-import cardsRouter from './cards';
-import claimsRouter from './claims';
-import adminRouter from './admin';
+// src/routes/index.ts
+import { Router } from "express";
+import authRoutes from "./auth";
+import adminRoutes from "./admin";
 import backgroundRoutes from "./background";
+import cardsRoutes from "./cards";
 
 const router = Router();
 
-router.use('/auth', authRouter);
-router.use('/sessions', sessionsRouter);
-router.use('/cards', cardsRouter);
-router.use('/claims', claimsRouter);
-router.use('/admin', adminRouter);
+router.use("/auth", authRoutes);
+router.use("/admin", adminRoutes);
 router.use("/backgrounds", backgroundRoutes);
+router.use("/cards", cardsRoutes);
 
 export default router;

@@ -1,16 +1,18 @@
-import { Router } from 'express';
-import { requireAuth } from '../middleware/auth';
-import { createCard, getCard, markNumber } from '../controllers/cards.controller';
-import { z } from 'zod';
-import { validateBody } from '../middleware/validate';
+// src/routes/cards.ts
+import { Router } from "express";
+import { requireAuth } from "../middleware/auth";
+import { assignCardsToUser, getTodayCalledNumbers, getUserCards, markNumber   } from "../controllers/cards.controller";
 
 const router = Router();
 
-const createSchema = z.object({ sessionId: z.string() });
-const markSchema = z.object({ number: z.number().min(1).max(75) });
-
-router.post('/', requireAuth, validateBody(createSchema), createCard);
-router.get('/:cardId', requireAuth, getCard);
-router.post('/:cardId/mark', requireAuth, validateBody(markSchema), markNumber);
+// router.post("/", requireAuth, createCard);
+// router.get("/:cardId", requireAuth, getCard);
+// router.post("/:cardId/mark", requireAuth, markNumber);
+router.post("/generate", requireAuth, assignCardsToUser);
+router.post("/mark", requireAuth, markNumber);
+router.get("/today-called", requireAuth, getTodayCalledNumbers);
+router.post("/assign", requireAuth, assignCardsToUser);
+router.get("/users", requireAuth, getUserCards);
+router.get('/user', requireAuth, getUserCards);
 
 export default router;

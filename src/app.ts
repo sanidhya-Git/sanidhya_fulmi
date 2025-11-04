@@ -7,6 +7,9 @@ import { connectDB } from './config/db';
 import routes from './routes';
 import errorHandler from './middleware/errorHandler';
 import logger from './logger';
+import backgroundRoutes from "./routes/background";
+import sessionRoutes from "./routes/sessions";
+
 
 connectDB();
 
@@ -22,6 +25,9 @@ app.use(rateLimiter);
 app.get('/health', (_req, res) => res.json({ ok: true, env: process.env.NODE_ENV }));
 
 app.use('/api', routes);
+app.use('/api/backgrounds', backgroundRoutes);
+app.use('/api/sessions', sessionRoutes);
+
 
 app.use(errorHandler);
 

@@ -1,21 +1,11 @@
-import { Schema, model, Document } from "mongoose";
+import mongoose from "mongoose";
 
-export interface IBackgroundConfig extends Document {
-  backgroundImageUrl: string;
-  welcomeMessage: string;
-  startDate: Date;
-  endDate: Date;
-  createdAt: Date;
-}
+const backgroundSchema = new mongoose.Schema({
+  backgroundImageUrl: { type: String, required: true },
+  welcomeMessage: { type: String },
+  startDate: { type: Date },
+  endDate: { type: Date },
+  uploadedAt: { type: Date, default: Date.now },
+});
 
-const backgroundConfigSchema = new Schema<IBackgroundConfig>(
-  {
-    backgroundImageUrl: { type: String, required: true },
-    welcomeMessage: { type: String, required: true },
-    startDate: { type: Date, required: true },
-    endDate: { type: Date, required: true },
-  },
-  { timestamps: true }
-);
-
-export default model<IBackgroundConfig>("BackgroundConfig", backgroundConfigSchema);
+export default mongoose.model("Background", backgroundSchema);

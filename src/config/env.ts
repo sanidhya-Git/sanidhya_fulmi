@@ -1,12 +1,24 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import dotenv from "dotenv";
+import path from "path";
 
-const required = ['MONGO_URI', 'JWT_SECRET', 'REFRESH_TOKEN_SECRET'];
-for (const key of required) {
-  if (!process.env[key]) {
-    if (process.env.NODE_ENV !== 'production') continue;
-    throw new Error(`Missing required env var ${key}`);
-  }
+
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+
+
+if (!process.env.JWT_SECRET) {
+  console.error("❌ JWT_SECRET is missing in environment variables");
+} else {
+  console.log("✅ Environment variables loaded successfully");
 }
 
-export {};
+export const {
+  PORT,
+  NODE_ENV,
+  MONGO_URI,
+  JWT_SECRET,
+  JWT_EXPIRES_IN,
+  REFRESH_TOKEN_SECRET,
+  CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET,
+} = process.env;

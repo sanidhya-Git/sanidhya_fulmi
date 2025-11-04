@@ -1,20 +1,27 @@
-import { Router } from 'express';
-import { requireAuth, requireAdmin } from '../middleware/auth';
-import { getUsers, getWinners, updateSettings } from '../controllers/admin.controller';
-import { z } from 'zod';
-import { validateBody } from '../middleware/validate';
+import express from "express";
+import {
+  getUsers,
+  generateCardsByAdmin,
+  callNumbersForToday,
+  getAllCalledNumbers,
+  updatePatternLimits,
+  getPatternLimits,
+  resetRemainingClaims,
+} from "../controllers/admin.controller";
+import { requireAdmin, requireAuth } from "../middleware/auth";
 
-const router = Router();
 
-const settingsSchema = z.object({
-  maxClaimsPerPattern: z.record(z.string(), z.number()).optional(),
-  cardsPerUserDefault: z.number().optional()
-});
+const router = express.Router();
 
-router.use(requireAuth, requireAdmin);
+// Existing routes
+router.get("/users", requireAuth, requireAdmin, getUsers);
+router.post("/generate-cards", requireAuth, requireAdmin, generateCardsByAdmin);
+router.post("/call-numbers", requireAuth, requireAdmin, callNumbersForToday);
+router.get("/call-numbers", requireAuth, requireAdmin, getAllCalledNumbers);
 
-router.get('/users', getUsers);
-router.get('/winners', getWinners);
-router.post('/settings', validateBody(settingsSchema), updateSettings);
+
+router.post("/pattern-limits", requireAuth, requireAdmin, updatePatternLimits);
+router.get("/pattern-limits", requireAuth, requireAdmin, getPatternLimits);
+router.post("/pattern-limits/reset", requireAuth, requireAdmin, resetRemainingClaims);
 
 export default router;

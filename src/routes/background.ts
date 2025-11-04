@@ -1,5 +1,6 @@
+// src/routes/background.ts
 import { Router } from "express";
-import { requireAdmin } from "../middleware/auth";
+import { requireAdmin, requireAuth } from "../middleware/auth";
 import {
   uploadBackground,
   listBackgrounds,
@@ -8,11 +9,10 @@ import {
 
 const router = Router();
 
-router.post("/", requireAdmin, uploadBackground);
+// ✅ Require authentication AND admin privileges
+router.post("/upload", requireAuth, requireAdmin, uploadBackground);
 
 router.get("/", listBackgrounds);
-
-
 router.get("/active", getCurrentBackground);
 
 export default router;

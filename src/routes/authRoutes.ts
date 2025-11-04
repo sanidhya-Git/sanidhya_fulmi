@@ -14,7 +14,7 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ success: false, error: "Invalid credentials" });
     }
 
-    // ✅ Use passwordHash instead of password
+
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
       return res.status(401).json({ success: false, error: "Invalid credentials" });
