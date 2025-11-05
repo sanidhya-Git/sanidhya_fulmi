@@ -4,3 +4,5 @@ node_modules
 dist
 README.md
 pnpm-lock.yaml
+.git
+.gitignore
