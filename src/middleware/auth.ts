@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { JWT_SECRET } from "../config/env"; // ensure you export JWT_SECRET from config/env
+import { JWT_SECRET } from "../config/env"; 
 
 export interface AuthPayload extends JwtPayload {
   userId: string;
@@ -8,7 +8,7 @@ export interface AuthPayload extends JwtPayload {
   email?: string;
 }
 
-// Middleware to verify any authenticated user
+
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const header = req.headers.authorization;
 
@@ -23,18 +23,18 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
 
   try {
     if (!JWT_SECRET) {
-      console.error("❌ Missing JWT_SECRET in environment");
+      console.error("Missing JWT_SECRET in environment");
       return res.status(500).json({ success: false, error: "Server misconfiguration" });
     }
 
     const payload = jwt.verify(token, JWT_SECRET) as AuthPayload;
 
-    // ✅ attach the decoded payload to the request object
+    // attach the decoded payload to the request object
     (req as any).user = payload;
 
     next();
   } catch (err) {
-    console.error("❌ JWT verification failed:", err);
+    console.error("JWT verification failed:", err);
     return res.status(403).json({ success: false, error: "Invalid or expired token" });
   }
 }

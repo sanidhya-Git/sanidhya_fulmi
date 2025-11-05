@@ -1,4 +1,4 @@
-// 📄 src/controllers/auth.controller.ts
+
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt, { Secret, SignOptions } from "jsonwebtoken";
@@ -6,32 +6,30 @@ import jwt, { Secret, SignOptions } from "jsonwebtoken";
 import User from "../models/User";
 import { JWT_SECRET, JWT_EXPIRES_IN } from "../config/env";
 
-/**
- * 🛡️ Register Admin
- */
+
 export const registerAdmin = async (req: Request, res: Response) => {
   try {
     const { name, email, password } = req.body;
 
-    // ✅ Validate input
+    
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, error: "All fields are required" });
     }
 
-    // ✅ Check if email already exists
+    
     const existing = await User.findOne({ email });
     if (existing) {
       return res.status(400).json({ success: false, error: "Email already exists" });
     }
 
-    // ✅ Hash password
+    
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ✅ Create admin
+    
     const admin = await User.create({
       name,
       email,
-      password: hashedPassword, // ✅ Fixed field name
+      password: hashedPassword, 
       role: "admin",
       isAdmin: true,
     });
@@ -52,9 +50,6 @@ export const registerAdmin = async (req: Request, res: Response) => {
   }
 };
 
-/**
- * 👤 Register Normal User
- */
 export const registerUser = async (req: Request, res: Response) => {
   try {
     const { name, email, password } = req.body;
@@ -73,7 +68,7 @@ export const registerUser = async (req: Request, res: Response) => {
     const user = await User.create({
       name,
       email,
-      password: hashedPassword, // ✅ Fixed
+      password: hashedPassword, 
       role: "user",
       isAdmin: false,
     });
@@ -94,9 +89,7 @@ export const registerUser = async (req: Request, res: Response) => {
   }
 };
 
-/**
- * 🔐 Login (Admin or User)
- */
+
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
@@ -110,13 +103,13 @@ export const login = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: "User not found" });
     }
 
-    // ✅ Compare with hashed password
+    
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ success: false, error: "Invalid credentials" });
     }
 
-    // ✅ Safe JWT secret
+   
     const secret = (JWT_SECRET || process.env.JWT_SECRET) as Secret;
     if (!secret) {
       return res.status(500).json({ success: false, error: "JWT secret not configured" });

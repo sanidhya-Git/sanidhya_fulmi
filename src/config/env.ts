@@ -6,9 +6,9 @@ dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 
 if (!process.env.JWT_SECRET) {
-  console.error("❌ JWT_SECRET is missing in environment variables");
+  console.error(" JWT_SECRET is missing in environment variables");
 } else {
-  console.log("✅ Environment variables loaded successfully");
+  console.log(" Environment variables loaded successfully");
 }
 
 export const {

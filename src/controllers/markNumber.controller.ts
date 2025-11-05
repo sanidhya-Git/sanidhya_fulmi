@@ -1,4 +1,4 @@
-// src/controllers/markNumber.controller.ts
+
 import { Request, Response } from "express";
 import CalledNumber from "../models/CalledNumber";
 import MarkedNumber from "../models/Markednumber";

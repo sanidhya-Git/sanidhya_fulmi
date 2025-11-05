@@ -1,13 +1,11 @@
-// 📄 src/controllers/cards.controller.ts
+
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { BingoCardModel } from "../models/BingoCard";
 import { GameSessionModel } from "../models/GameSession";
 import UserModel from "../models/User";
 
-/**
- * 🎴 Assign Bingo cards to a user for the current active game session.
- */
+
 export async function assignCardsToUser(req: Request, res: Response) {
   try {
     const { userId, cardCount } = req.body;
@@ -26,7 +24,7 @@ export async function assignCardsToUser(req: Request, res: Response) {
         message: "User not found.",
       });
 
-    // ✅ Find active session (today’s date between start and end, and status 'running')
+   
     const today = new Date();
     const session = await GameSessionModel.findOne({
       startDate: { $lte: today },
@@ -41,7 +39,7 @@ export async function assignCardsToUser(req: Request, res: Response) {
       });
     }
 
-    // ✅ Check if the user already has cards for this session
+    
     const existingCards = await BingoCardModel.find({
       userId,
       sessionId: session._id,
@@ -54,13 +52,13 @@ export async function assignCardsToUser(req: Request, res: Response) {
       });
     }
 
-    // ✅ Find unassigned cards (created by admin)
+  
     const availableCards = await BingoCardModel.find({
       isAssigned: false,
       sessionId: null,
     }).limit(cardCount);
 
-    // 🔹 Auto-generate cards if not enough exist
+   
     if (availableCards.length < cardCount) {
       const deficit = cardCount - availableCards.length;
       console.warn(`⚠️ Only ${availableCards.length} available cards. Generating ${deficit} new ones.`);
@@ -77,7 +75,7 @@ export async function assignCardsToUser(req: Request, res: Response) {
       availableCards.push(...moreCards);
     }
 
-    // ✅ Assign selected cards to the user
+   
     const assignedCards = [];
     for (const card of availableCards.slice(0, cardCount)) {
       card.userId = new mongoose.Types.ObjectId(userId);
@@ -99,9 +97,7 @@ export async function assignCardsToUser(req: Request, res: Response) {
   }
 }
 
-/**
- * 🔢 Retrieve the numbers called for the current session.
- */
+
 export async function getTodayCalledNumbers(req: Request, res: Response) {
   try {
     const today = new Date();
@@ -127,10 +123,6 @@ export async function getTodayCalledNumbers(req: Request, res: Response) {
     res.status(500).json({ success: false, error: err.message });
   }
 }
-
-/**
- * 🧾 Get all Bingo cards assigned to a user.
- */
 export async function getUserCards(req: Request, res: Response) {
   try {
     const userId = req.params.userId || (req as any).user?.userId;
@@ -187,7 +179,7 @@ export async function markNumber(req: Request, res: Response) {
       });
     }
 
-    // ✅ Mark the number
+    
     card.marked.push(number);
     await card.save();
 

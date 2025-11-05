@@ -79,7 +79,7 @@ router.post("/generate", requireAuth, async (req, res) => {
     const card = new BingoCard({
       userId: user.userId,
       sessionId,
-      board: generateBingoCard(), // ✅ returns Cell[][]
+      board: generateBingoCard(), 
     });
 
     await card.save();

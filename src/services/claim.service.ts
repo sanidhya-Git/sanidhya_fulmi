@@ -20,25 +20,25 @@ export async function createClaim(
   session.startTransaction();
 
   try {
-    // ✅ Fetch bingo card
+    //  Fetch bingo card
     const card = await BingoCardModel.findOne({ cardId }).session(session);
     if (!card) throw new Error("Card not found");
     if (String(card.userId) !== String(userId))
       throw new Error("Card does not belong to user");
 
-    // ✅ Fetch game session
+    //  Fetch game session
     const game = await GameSessionModel.findById(card.sessionId).session(
       session
     );
     if (!game) throw new Error("Session not found");
 
-    // ✅ Check pattern (ensure board type matches)
+    //  Check pattern (ensure board type matches)
     const { matched, coords } = checkPattern(
       card.board as any[][], // in case board is number[][]
       pattern
     );
 
-    // ✅ Get or create admin settings
+    //  Get or create admin settings
     let settings = await AdminSettingsModel.findOne().session(session);
     if (!settings) {
       settings = new AdminSettingsModel({
@@ -69,7 +69,7 @@ export async function createClaim(
     // Generate claim token if matched
     const token = matched ? generate6DigitToken() : undefined;
 
-    // ✅ Create claim document
+    //  Create claim document
     const [createdClaim] = await ClaimModel.create(
       [
         {
@@ -84,7 +84,7 @@ export async function createClaim(
       { session }
     );
 
-    // ✅ Decrement remaining claims if valid claim
+    //  Decrement remaining claims if valid claim
     if (matched && typeof remainingForPattern === "number") {
       settings.remainingClaimsPerPattern.set(pattern, remainingForPattern - 1);
       await settings.save({ session });
@@ -92,7 +92,7 @@ export async function createClaim(
 
     await session.commitTransaction();
 
-    // ✅ Send claim email if matched
+    //  Send claim email if matched
     if (matched) {
       const user = await UserModel.findById(userId);
       if (user) {

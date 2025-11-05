@@ -134,9 +134,7 @@ const GameSessionSchema = new Schema<IGameSession>(
   }
 );
 
-/**
- * Create the Mongoose model
- */
+
 export const GameSessionModel = mongoose.model<IGameSession>(
   "GameSession",
   GameSessionSchema

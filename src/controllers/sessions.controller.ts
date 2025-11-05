@@ -1,18 +1,16 @@
-// src/controllers/sessions.controller.ts
+
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import GameSessionModel, { IGameSession, IWinner } from "../models/GameSession";
 import CalledNumber from "../models/CalledNumber";
 import { BingoCardModel } from "../models/BingoCard";
 
-/** Helper: get today's date string (YYYY-MM-DD) */
+
 function todayString(): string {
   return new Date().toISOString().split("T")[0];
 }
 
-/**
- * 🧩 Get all participants of a session
- */
+
 export async function getSessionParticipants(req: Request, res: Response) {
   try {
     const { id } = req.params;
@@ -49,9 +47,6 @@ export async function getSessionParticipants(req: Request, res: Response) {
   }
 }
 
-/**
- * 🎨 Set session patterns
- */
 export const setSessionPatterns = async (req: Request, res: Response) => {
   try {
     const session = await GameSessionModel.findById(req.params.id);
@@ -71,9 +66,6 @@ export const setSessionPatterns = async (req: Request, res: Response) => {
   }
 };
 
-/**
- * 🧱 Create a new session
- */
 export async function createSession(req: Request, res: Response) {
   try {
     const { name, startDate, endDate, backgroundId } = req.body;
@@ -106,9 +98,6 @@ export async function createSession(req: Request, res: Response) {
   }
 }
 
-/**
- * ▶️ Start session
- */
 export async function startSession(req: Request, res: Response) {
   try {
     const { id } = req.params;
@@ -131,9 +120,7 @@ export async function startSession(req: Request, res: Response) {
   }
 }
 
-/**
- * 🔢 Call a number during a running session
- */
+
 export async function callNumber(req: Request, res: Response) {
   try {
     const { id } = req.params;
@@ -172,9 +159,7 @@ export async function callNumber(req: Request, res: Response) {
   }
 }
 
-/**
- * 🧾 Get session details (admin view)
- */
+
 export async function getSessionDetails(req: Request, res: Response) {
   try {
     const { id } = req.params;
@@ -236,9 +221,7 @@ export async function getSessionDetails(req: Request, res: Response) {
   }
 }
 
-/**
- * 🏆 Declare a winner for a specific pattern
- */
+
 export const declareWinner = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -261,7 +244,7 @@ export const declareWinner = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: "User already declared winner for this pattern" });
     }
 
-    // ✅ Build a proper IWinner object
+
     const winnerObj: IWinner = {
       user: new mongoose.Types.ObjectId(userId),
       pattern: patternName,

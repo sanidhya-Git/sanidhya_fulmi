@@ -8,7 +8,7 @@ interface BackgroundInput {
   endDate?: Date;
 }
 
-// ✅ Upload a Cloudinary image from a URL or base64
+//  Upload a Cloudinary image from a URL or base64
 export async function uploadBackgroundImageFromURL(image: string): Promise<string> {
   const result = await cloudinary.uploader.upload(image, {
     folder: "mindful_dashboard/backgrounds",
@@ -16,7 +16,7 @@ export async function uploadBackgroundImageFromURL(image: string): Promise<strin
   return result.secure_url;
 }
 
-// ✅ Create a new background record
+//  Create a new background record
 export async function createBackground(data: BackgroundInput) {
   const background = new Background({
     backgroundImageUrl: data.backgroundImageUrl,
@@ -28,7 +28,7 @@ export async function createBackground(data: BackgroundInput) {
   return background.save();
 }
 
-// ✅ Paginate backgrounds
+//  Paginate backgrounds
 export async function getBackgrounds(page = 1, limit = 10) {
   const skip = (page - 1) * limit;
   const total = await Background.countDocuments();
@@ -36,7 +36,7 @@ export async function getBackgrounds(page = 1, limit = 10) {
   return { total, page, limit, data };
 }
 
-// ✅ Get currently active background (based on date range)
+//  Get currently active background (based on date range)
 export async function getActiveBackground() {
   const now = new Date();
   return Background.findOne({

@@ -9,7 +9,7 @@ import {
 
 const router = Router();
 
-// ✅ Require authentication AND admin privileges
+// require authentication AND admin privileges
 router.post("/upload", requireAuth, requireAdmin, uploadBackground);
 
 router.get("/", listBackgrounds);

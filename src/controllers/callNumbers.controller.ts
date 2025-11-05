@@ -1,4 +1,4 @@
-// src/controllers/callNumbers.controller.ts
+
 import { Request, Response } from "express";
 import CalledNumber from "../models/CalledNumber";
 import { getRandomNumbers } from "../utils/randomNumbers";
@@ -29,7 +29,7 @@ export async function callRandomNumbers(req: Request, res: Response) {
       return res.status(400).json({ success: false, message: "Numbers already called today" });
     }
 
-    const numbers = getRandomNumbers(limit, 1, 75); // or 1–100, adjust as needed
+    const numbers = getRandomNumbers(limit, 1, 75); 
 
     const record = await CalledNumber.create({ date: today, numbers });
 

@@ -1,4 +1,4 @@
-// src/models/CalledNumber.ts
+
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface ICalledNumber extends Document {
