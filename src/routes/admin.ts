@@ -9,6 +9,7 @@ import {
   resetRemainingClaims,
 } from "../controllers/admin.controller";
 import { requireAdmin, requireAuth } from "../middleware/auth";
+import adminAssignmentsRoutes from "./adminAssignments";
 
 
 const router = express.Router();
@@ -18,7 +19,7 @@ router.get("/users", requireAuth, requireAdmin, getUsers);
 router.post("/generate-cards", requireAuth, requireAdmin, generateCardsByAdmin);
 router.post("/call-numbers", requireAuth, requireAdmin, callNumbersForToday);
 router.get("/call-numbers", requireAuth, requireAdmin, getAllCalledNumbers);
-
+router.use("/", adminAssignmentsRoutes);
 
 router.post("/pattern-limits", requireAuth, requireAdmin, updatePatternLimits);
 router.get("/pattern-limits", requireAuth, requireAdmin, getPatternLimits);
