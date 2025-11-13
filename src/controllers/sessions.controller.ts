@@ -1,16 +1,87 @@
-
+// src/controllers/sessions.controller.ts
 import { Request, Response } from "express";
 import mongoose from "mongoose";
-import GameSessionModel, { IGameSession, IWinner } from "../models/GameSession";
+import GameSessionModel, { IWinner } from "../models/GameSession";
 import CalledNumber from "../models/CalledNumber";
 import { BingoCardModel } from "../models/BingoCard";
+import { IGameSession } from "../models/GameSession";
 
-
+// Utility
 function todayString(): string {
   return new Date().toISOString().split("T")[0];
 }
 
+/**
+ * GET /api/sessions
+ * Query:
+ *  - status?: "waiting" | "running" | "completed"
+ *  - page?: number
+ *  - limit?: number
+ *  - q?: string (search name)
+ */
+export async function listSessions(req: Request, res: Response) {
+  try {
+    const { status, page = 1, limit = 20, q } = req.query;
+    const pageNum = Math.max(1, Number(page) || 1);
+    const limitNum = Math.max(1, Math.min(200, Number(limit) || 20));
 
+    const filter: any = {};
+    if (status && typeof status === "string") {
+      if (["waiting", "running", "completed"].includes(status)) {
+        filter.status = status;
+      }
+    }
+
+    if (q && typeof q === "string") {
+      filter.name = { $regex: q, $options: "i" };
+    }
+
+    const total = await GameSessionModel.countDocuments(filter);
+
+    const sessions = await GameSessionModel.find(filter)
+      .sort({ startDate: 1 })
+      .skip((pageNum - 1) * limitNum)
+      .limit(limitNum)
+      .populate("background")
+      .lean();
+
+    const sessionsWithStats = await Promise.all(
+      sessions.map(async (s: any) => {
+        const playersCount = await BingoCardModel.countDocuments({
+          sessionId: s._id,
+          userId: { $ne: null },
+        });
+
+        const calledRecords = await CalledNumber.find({ sessionId: s._id });
+        const totalCalledNumbers = calledRecords.reduce(
+          (acc, r) => acc + (r.numbers?.length || 0),
+          0
+        );
+
+        return {
+          ...s,
+          playersCount,
+          totalCalledNumbers,
+        };
+      })
+    );
+
+    return res.json({
+      success: true,
+      total,
+      page: pageNum,
+      limit: limitNum,
+      data: sessionsWithStats,
+    });
+  } catch (err: any) {
+    console.error("listSessions error:", err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+}
+
+/**
+ * Get session participants
+ */
 export async function getSessionParticipants(req: Request, res: Response) {
   try {
     const { id } = req.params;
@@ -120,7 +191,6 @@ export async function startSession(req: Request, res: Response) {
   }
 }
 
-
 export async function callNumber(req: Request, res: Response) {
   try {
     const { id } = req.params;
@@ -152,13 +222,16 @@ export async function callNumber(req: Request, res: Response) {
       { upsert: true, new: true }
     );
 
-    res.json({ success: true, message: `Number ${number} called`, data: { sessionId: session._id, number } });
+    res.json({
+      success: true,
+      message: `Number ${number} called`,
+      data: { sessionId: session._id, number },
+    });
   } catch (err: any) {
     console.error("callNumber error:", err);
     res.status(500).json({ success: false, error: err.message });
   }
 }
-
 
 export async function getSessionDetails(req: Request, res: Response) {
   try {
@@ -211,7 +284,7 @@ export async function getSessionDetails(req: Request, res: Response) {
         stats: {
           totalPlayers: players.length,
           totalCalledNumbers: allCalledNumbers.length,
-          winnersCount: (session.winners && session.winners.length) || 0,
+          winnersCount: session.winners?.length || 0,
         },
       },
     });
@@ -220,7 +293,6 @@ export async function getSessionDetails(req: Request, res: Response) {
     res.status(500).json({ success: false, error: err.message });
   }
 }
-
 
 export const declareWinner = async (req: Request, res: Response) => {
   try {
@@ -243,7 +315,6 @@ export const declareWinner = async (req: Request, res: Response) => {
     if (pattern.winners.some((w) => w.user.toString() === userId)) {
       return res.status(400).json({ success: false, error: "User already declared winner for this pattern" });
     }
-
 
     const winnerObj: IWinner = {
       user: new mongoose.Types.ObjectId(userId),
